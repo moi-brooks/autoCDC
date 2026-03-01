@@ -24,29 +24,33 @@ class InferenceService:
 
     def _build_prompt(self, data: Dict[str, Any]) -> str:
         return f"""
-        Analyze the following crawled data from {data['url']} and generate a comprehensive 'Cahier des Charges' (Project Specifications).
+        Analyze the following crawled data from {data['url']} and generate a professional 'Cahier des Charges' (Project Specifications).
         
         Website Title: {data['title']}
         Detected Links: {json.dumps(data['links'][:20])}
         Detected Forms: {json.dumps(data['forms'])}
         Detected Buttons: {json.dumps(data['buttons'])}
         
-        The output must be a JSON object containing the following 15 sections:
-        1. Contexte & Objectifs
-        2. Description du besoin
-        3. Analyse de l’existant
-        4. Périmètre fonctionnel
-        5. Acteurs et rôles
-        6. Cas d’utilisation
-        7. Exigences fonctionnelles (MVP, Standard, Advanced)
-        8. Exigences non fonctionnelles
-        9. Architecture technique proposée
-        10. Modèle de données préliminaire
-        11. API endpoints proposés
-        12. Planning estimatif
-        13. Estimation budgétaire
-        14. Livrables
-        15. Risques & hypothèses
+        The output must be a JSON object containing the following 15 sections. 
+        Each section must be detailed, professional, and directly relevant to the data analyzed.
         
-        For each feature in 'Exigences fonctionnelles', include a 'complexity' (MVP/Standard/Advanced) and a 'confidence_score'.
+        Sections:
+        1. "Contexte & Objectifs": Describe the current state and what the project aims to achieve.
+        2. "Description du besoin": Explicitly state what the target users need.
+        3. "Analyse de l’existant": Detail any existing systems or competition found from the data.
+        4. "Périmètre fonctionnel": Define the boundaries of the system.
+        5. "Acteurs et rôles": List the types of users and their expected interactions.
+        6. "Cas d’utilisation": Provide 3-5 key user scenarios.
+        7. "Exigences fonctionnelles": List features categorized by complexity (MVP, Standard, Advanced). 
+           Format: Array of objects with 'feature', 'description', 'complexity', and 'confidence_score' (0-1).
+        8. "Exigences non fonctionnelles": Include security, performance, and accessibility requirements.
+        9. "Architecture technique proposée": Suggest a modern stack based on the requirements.
+        10. "Modèle de données préliminaire": List the main entities and their attributes.
+        11. "API endpoints proposés": Suggest key REST or GraphQL endpoints.
+        12. "Planning estimatif": Provide a high-level timeline for development phases.
+        13. "Estimation budgétaire": Provide a realistic cost range for development.
+        14. "Livrables": List all the items to be handed over (code, docs, etc.).
+        15. "Risques & hypothèses": Identify potential project risks and assumptions made.
+
+        The JSON must be valid, use French for section titles and content, and maintain a high-quality consultant tone.
         """

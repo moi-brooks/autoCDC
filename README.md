@@ -4,7 +4,7 @@ AutoCdC is a requirements engineering automation platform that generates a struc
 
 ## Architecture
 
-- **Backend:** FastAPI (Python), Playwright (Crawling), OpenAI (Analysis)
+- **Backend:** FastAPI (Python), Playwright (Crawling), Groq (Analysis)
 - **Frontend:** React + TypeScript + Vite, Tailwind CSS
 - **Infrastructure:** PostgreSQL, Redis, Docker
 

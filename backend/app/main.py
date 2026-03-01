@@ -7,7 +7,10 @@ from app.inference.service import InferenceService
 from app.generator.service import GeneratorService
 from pydantic import BaseModel
 from typing import Dict, Any
+from dotenv import load_dotenv
 import io
+
+load_dotenv()
 
 class CdcExport(BaseModel):
     metadata: Dict[str, Any]
