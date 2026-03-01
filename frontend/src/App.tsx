@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Globe, Send, Loader2, FileText, ChevronRight, Layout, 
   Edit3, Save, Download, RefreshCw, Layers, Target, 
   Users, Activity, Code, Database, Clock, CreditCard, 
-  Package, AlertTriangle, Shield, Check, X, Search
+  Package, AlertTriangle, Shield, Check, X, Search,
+  Languages
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
@@ -17,23 +21,39 @@ function cn(...inputs: ClassValue[]) {
 // --- Icons Mapping ---
 const SECTION_ICONS: Record<string, any> = {
   "Contexte & Objectifs": Target,
+  "Context & Objectives": Target,
   "Description du besoin": Users,
+  "User Needs": Users,
   "Analyse de l’existant": Search,
+  "Existing Analysis": Search,
   "Périmètre fonctionnel": Layers,
+  "Functional Scope": Layers,
   "Acteurs et rôles": Users,
+  "Actors & Roles": Users,
   "Cas d’utilisation": Activity,
+  "Use Cases": Activity,
   "Exigences fonctionnelles": Code,
+  "Functional Requirements": Code,
   "Exigences non fonctionnelles": Shield,
+  "Non-Functional Requirements": Shield,
   "Architecture technique proposée": Layers,
+  "Technical Architecture": Layers,
   "Modèle de données préliminaire": Database,
+  "Data Model": Database,
   "API endpoints proposés": Globe,
+  "API Endpoints": Globe,
   "Planning estimatif": Clock,
+  "Estimated Planning": Clock,
   "Estimation budgétaire": CreditCard,
+  "Budget Estimation": CreditCard,
   "Livrables": Package,
+  "Deliverables": Package,
   "Risques & hypothèses": AlertTriangle,
+  "Risks & Hypotheses": AlertTriangle,
 };
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -44,10 +64,10 @@ function App() {
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   const steps = [
-    "Crawling the website...",
-    "Extracting metadata...",
-    "Analyzing features...",
-    "Generating professional CdC..."
+    t('step_crawling'),
+    t('step_metadata'),
+    t('step_analysis'),
+    t('step_generation')
   ];
 
   useEffect(() => {
@@ -60,7 +80,12 @@ function App() {
       setLoadingStep(0);
     }
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [loading, steps.length]);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'fr' ? 'en' : 'fr';
+    i18n.changeLanguage(newLang);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +95,7 @@ function App() {
       const response = await fetch('http://localhost:8000/crawl', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, language: i18n.language }),
       });
       const result = await response.json();
       setData(result);
@@ -113,7 +138,8 @@ function App() {
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = downloadUrl;
-      a.download = `Cahier_des_Charges_${data.metadata.title.replace(/\s+/g, '_')}.${format === 'md' ? 'md' : 'pdf'}`;
+      const filename = data.metadata.title.replace(/\s+/g, '_');
+      a.download = `CdC_${filename}.${format === 'md' ? 'md' : 'pdf'}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -132,18 +158,26 @@ function App() {
             <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-200">
               <FileText className="text-white w-5 h-5" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">AutoCdC</h1>
+            <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-slate-900 to-slate-600 bg-clip-text text-transparent">{t('app_title')}</h1>
             <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-md border border-slate-200">v1.0</span>
           </div>
 
           <div className="flex items-center gap-4">
+            <button 
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-bold text-slate-600"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              {i18n.language.toUpperCase()}
+            </button>
+            
             {data && (
               <div className="relative">
                 <button 
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg font-semibold hover:bg-slate-800 transition-all shadow-md shadow-slate-200 active:scale-95"
                 >
-                  <Download className="w-4 h-4" /> Export
+                  <Download className="w-4 h-4" /> {t('export')}
                 </button>
                 <AnimatePresence>
                   {showExportMenu && (
@@ -154,18 +188,18 @@ function App() {
                       className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden z-50 p-1"
                     >
                       <button onClick={() => downloadExport('md')} className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-3">
-                        <FileText className="w-4 h-4 text-blue-500" /> Markdown (.md)
+                        <FileText className="w-4 h-4 text-blue-500" /> {t('export_md')}
                       </button>
                       <button onClick={() => downloadExport('pdf')} className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-3">
-                        <FileText className="w-4 h-4 text-red-500" /> Adobe PDF (.pdf)
+                        <FileText className="w-4 h-4 text-red-500" /> {t('export_pdf')}
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             )}
-            <button className="text-slate-400 hover:text-slate-600 p-2">
-              <RefreshCw className="w-5 h-5" onClick={() => window.location.reload()} />
+            <button className="text-slate-400 hover:text-slate-600 p-2" onClick={() => window.location.reload()}>
+              <RefreshCw className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -182,11 +216,10 @@ function App() {
               <Globe className="w-12 h-12 text-blue-600" />
             </div>
             <h2 className="text-5xl font-extrabold mb-6 tracking-tight text-slate-900">
-              Transform any <span className="text-blue-600">URL</span> into a <br />professional specification.
+              {t('tagline_start')}<span className="text-blue-600">URL</span> {t('tagline_end')}
             </h2>
             <p className="text-xl text-slate-500 mb-12 leading-relaxed">
-              Analyze landing pages, SaaS apps, or portals to generate a complete 
-              Cahier des Charges in seconds using AI.
+              {t('hero_p')}
             </p>
             
             <form onSubmit={handleSubmit} className="w-full relative group">
@@ -199,7 +232,7 @@ function App() {
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com/project"
+                  placeholder={t('input_placeholder')}
                   required
                   className="block w-full pl-14 pr-44 py-5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-xl"
                 />
@@ -207,20 +240,20 @@ function App() {
                   type="submit"
                   className="absolute right-2.5 px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center gap-2 active:scale-95 shadow-lg shadow-blue-200"
                 >
-                  <Send className="w-5 h-5" /> Generate
+                  <Send className="w-5 h-5" /> {t('btn_generate')}
                 </button>
               </div>
             </form>
             
             <div className="mt-12 flex gap-8 text-sm font-medium text-slate-400">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div> Powered by Llama 3.3
+                <div className="w-2 h-2 rounded-full bg-green-500"></div> {t('powered_by')}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div> 15 Detailed Sections
+                <div className="w-2 h-2 rounded-full bg-blue-500"></div> {t('sections_count')}
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-indigo-500"></div> MD & PDF Export
+                <div className="w-2 h-2 rounded-full bg-indigo-500"></div> {t('export_formats')}
               </div>
             </div>
           </motion.div>
@@ -242,7 +275,7 @@ function App() {
             >
               {steps[loadingStep]}
             </motion.p>
-            <p className="text-slate-400 mt-2 font-medium">This usually takes about 30-45 seconds.</p>
+            <p className="text-slate-400 mt-2 font-medium">{t('loading_time')}</p>
           </div>
         ) : (
           <div className="flex-1 flex gap-8 overflow-hidden min-h-0">
@@ -312,7 +345,7 @@ function App() {
                         </div>
                         <div>
                           <h2 className="text-xl font-bold text-slate-900">{activeSection}</h2>
-                          <p className="text-xs text-slate-500">Auto-generated by AutoCdC Intelligence</p>
+                          <p className="text-xs text-slate-500">{t('auto_generated')}</p>
                         </div>
                       </div>
                       
@@ -323,13 +356,13 @@ function App() {
                               onClick={() => setEditingSection(null)}
                               className="px-4 py-2 rounded-lg font-semibold text-slate-500 hover:bg-slate-100 transition-colors flex items-center gap-2"
                             >
-                              <X className="w-4 h-4" /> Cancel
+                              <X className="w-4 h-4" /> {t('cancel')}
                             </button>
                             <button 
                               onClick={() => handleSave(activeSection)}
                               className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-md shadow-blue-100 active:scale-95"
                             >
-                              <Check className="w-4 h-4" /> Save Changes
+                              <Check className="w-4 h-4" /> {t('save_changes')}
                             </button>
                           </>
                         ) : (
@@ -348,27 +381,36 @@ function App() {
                     <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
                       {editingSection === activeSection ? (
                         <div className="h-full flex flex-col gap-4">
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Editor Mode</p>
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t('editor_mode')}</p>
                           <textarea
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
                             className="flex-1 w-full p-6 font-mono text-sm bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none shadow-inner leading-relaxed"
-                            placeholder="Type your refined requirements here..."
                           />
                         </div>
                       ) : (
-                        <div className="max-w-4xl prose prose-slate">
-                          {typeof data.cdc[activeSection] === 'string' ? (
-                            <div className="text-lg text-slate-600 leading-relaxed whitespace-pre-wrap">
-                              {data.cdc[activeSection]}
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              <pre className="text-sm bg-slate-900 text-slate-300 p-6 rounded-2xl overflow-x-auto font-mono shadow-2xl border border-slate-700">
-                                {JSON.stringify(data.cdc[activeSection], null, 2)}
-                              </pre>
-                            </div>
-                          )}
+                        <div className="max-w-4xl markdown-content">
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              h1: ({node, ...props}) => <h1 className="text-3xl font-bold text-slate-900 mb-6 mt-2 border-b-2 border-slate-100 pb-4" {...props} />,
+                              h2: ({node, ...props}) => <h2 className="text-2xl font-bold text-slate-800 mb-4 mt-8" {...props} />,
+                              h3: ({node, ...props}) => <h3 className="text-xl font-bold text-slate-800 mb-3 mt-6" {...props} />,
+                              p: ({node, ...props}) => <p className="text-lg text-slate-600 leading-relaxed mb-4" {...props} />,
+                              ul: ({node, ...props}) => <ul className="list-disc list-inside mb-6 space-y-2 text-slate-600 pl-4" {...props} />,
+                              ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-6 space-y-2 text-slate-600 pl-4" {...props} />,
+                              li: ({node, ...props}) => <li className="text-lg" {...props} />,
+                              strong: ({node, ...props}) => <strong className="font-bold text-slate-900" {...props} />,
+                              table: ({node, ...props}) => <div className="overflow-x-auto my-6 rounded-xl border border-slate-200 shadow-sm"><table className="w-full text-left text-sm border-collapse" {...props} /></div>,
+                              thead: ({node, ...props}) => <thead className="bg-slate-50 border-b border-slate-200" {...props} />,
+                              th: ({node, ...props}) => <th className="px-6 py-4 font-bold text-slate-900" {...props} />,
+                              td: ({node, ...props}) => <td className="px-6 py-4 border-b border-slate-100 text-slate-600" {...props} />,
+                              code: ({node, ...props}) => <code className="bg-slate-100 px-1.5 py-0.5 rounded-md font-mono text-sm text-blue-600" {...props} />,
+                              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-blue-500 pl-6 my-6 italic text-slate-600" {...props} />
+                            }}
+                          >
+                            {typeof data.cdc[activeSection] === 'string' ? data.cdc[activeSection] : JSON.stringify(data.cdc[activeSection], null, 2)}
+                          </ReactMarkdown>
                         </div>
                       )}
                     </div>
@@ -379,23 +421,16 @@ function App() {
               {/* Bottom Context Nav */}
               <div className="px-8 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-400 font-medium">
                 <div className="flex items-center gap-4">
-                  <span>Sections Completed: 15 / 15</span>
+                  <span>{t('sections_completed')}: 15 / 15</span>
                   <div className="w-32 h-1 bg-slate-200 rounded-full overflow-hidden">
                     <div className="h-full bg-blue-500 w-full"></div>
                   </div>
                 </div>
-                <div>Last update: Just now</div>
+                <div>{t('last_update')}: {t('just_now')}</div>
               </div>
             </main>
           </div>
         )}
-      </div>
-      
-      {/* Toast Notification Placeholder */}
-      <div className="fixed bottom-8 right-8 pointer-events-none z-[100]">
-        <AnimatePresence>
-          {/* We could add toasts here */}
-        </AnimatePresence>
       </div>
     </div>
   );

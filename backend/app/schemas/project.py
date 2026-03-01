@@ -4,6 +4,7 @@ from typing import List, Optional, Dict, Any
 class ProjectCreate(BaseModel):
     url: HttpUrl
     description: Optional[str] = None
+    language: str = "fr"
 
 class ProjectResponse(BaseModel):
     id: str

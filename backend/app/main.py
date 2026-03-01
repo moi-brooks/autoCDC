@@ -41,7 +41,7 @@ async def start_crawl(project: ProjectCreate):
         crawled_data = await crawler.crawl_url(str(project.url))
         
         # Step 2: Infer CdC
-        cdc_result = await inference.generate_cdc(crawled_data)
+        cdc_result = await inference.generate_cdc(crawled_data, language=project.language)
         
         return {
             "metadata": {
