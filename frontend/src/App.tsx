@@ -20,10 +20,10 @@ function cn(...inputs: ClassValue[]) {
 
 // --- Icons Mapping ---
 const SECTION_ICONS: Record<string, any> = {
-  "Contexte & Objectifs": Target,
-  "Context & Objectives": Target,
-  "Description du besoin": Users,
-  "User Needs": Users,
+  "Présentation du Projet": Target,
+  "Project Presentation": Target,
+  "Organisation du Travail": Users,
+  "Work Organization": Users,
   "Analyse de l’existant": Search,
   "Existing Analysis": Search,
   "Périmètre fonctionnel": Layers,
@@ -40,7 +40,6 @@ const SECTION_ICONS: Record<string, any> = {
   "Technical Architecture": Layers,
   "Modèle de données préliminaire": Database,
   "Data Model": Database,
-  "API endpoints proposés": Globe,
   "API Endpoints": Globe,
   "Planning estimatif": Clock,
   "Estimated Planning": Clock,
